@@ -172,7 +172,7 @@ print(C)
 
 
 #visualise the clustering result using TSNE tool
-model = TSNE(n_components=2)
+model = TSNE(n_components=2,metric='cosine')
 Rep_2dim = model.fit_transform(representation_matrix_autoencoder)
 clusters = np.asarray([Rep_2dim[C == k]  for k in range(num_clusters) if np.any(Rep_2dim[C == k])])
 
