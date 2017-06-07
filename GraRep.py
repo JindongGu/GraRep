@@ -18,7 +18,7 @@ from time import time,strftime,localtime,gmtime
 
 from autoencoder import test_dA
 from sklearn.manifold import TSNE
-from kMeans import kMeans
+from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
 
 
@@ -179,15 +179,15 @@ print(representation_matrix_autoencoder)
 
 #clustering with K-means algorithm
 print("\nClustering with Kmeans ... ... ")
-centroids, C = kMeans(representation_matrix_autoencoder, K = num_clusters)
+K_means = KMeans(n_clusters=num_clusters).fit(representation_matrix_autoencoder)
 print("\nThe indices of clusters, to which each node belongs.")
-print(C)
+labels = K_means.labels_
 
 
 #visualise the clustering result using TSNE tool
-model = TSNE(n_components=2)
+model = TSNE(n_components=2, metric="cosine")
 Rep_2dim = model.fit_transform(representation_matrix_autoencoder)
-clusters = np.asarray([Rep_2dim[C == k]  for k in range(num_clusters) if np.any(Rep_2dim[C == k])])
+clusters = np.asarray([Rep_2dim[labels == k]  for k in range(num_clusters) if np.any(Rep_2dim[labels == k])])
 
 plt.title("The visualisation the 3 clusters chosen randomly")
 i=np.random.randint(num_clusters)
