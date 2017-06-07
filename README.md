@@ -5,8 +5,7 @@ implements a K-means algorithm, does clustering on the datasets and visulises th
 
 1. The original implementation needs a preprocessing of filering the isolated nodes. However, the isolated nodes can be necessary in some application.
 So, This implementation takes isolated nodes into consideration. With changes as following:
-Computation of transition matrix A
-Normalisation of the representation matrix 
+remove the isolated nodes in preprocessing step
 
 2. The original paper factorises the matrix using SVD to prove that the learned ditributted learning is improved by the global structural information.
 This project generates a distributted representation using Autoencoder instead of Matrix Factorization.
