@@ -17,8 +17,8 @@ import numpy as np
 from time import time,strftime,localtime,gmtime
 
 from autoencoder import test_dA
-from kMeans import kMeans
 from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
 
 
@@ -26,7 +26,7 @@ from matplotlib import pyplot as plt
 step = 10  ## the number of steps to collect structural information
 dim = 100  ## the number of dimentionalitied of the disttributted representation
 alpha = 0.5
-num_clusters = 15
+num_clusters = 10
 
 #load nodes of the graph
 with open("graph_data/414.feat", "rb") as f:
@@ -38,6 +38,7 @@ for node in nodes_feat:
     
 print("\nthe number of nodes is "+str(len(nodes)))
 
+
 #load edges of the graph
 with open("graph_data/414.edges", "rb") as f:
     nodes_pairs = f.readlines()
@@ -48,6 +49,19 @@ for nodes_pair in nodes_pairs:
     edges.append(nodes_pair.split(' ')[1].split('\n')[0])
     
 print("\nthe number of edges is "+str(len(edges)/2))
+
+
+#Preprocess: remove isolated nodes
+for start_node in nodes:
+    exist_flag = 0
+    for i in range(len(edges)):
+        if start_node == edges[i]:
+            exist_flag = 1
+    if exist_flag == 0:
+        nodes.remove(start_node)
+
+print("\nthe number of nodes after preprocess is "+str(len(nodes)))
+
 
 #get adjacency matrix
 nodes_num = len(nodes)
@@ -145,8 +159,7 @@ def GetRepMat_autoencoder():
     representation_matrix_autoencoder[np.isinf(representation_matrix_autoencoder)] = 0
 
     return representation_matrix_autoencoder
- 
-        
+      
 representation_matrix_svd = GetRepMat_svd()
 print("\nIn case of factorisation of matrix with SVD, the representation matrix is: ")
 print(representation_matrix_svd)
@@ -166,19 +179,23 @@ print(representation_matrix_autoencoder)
 
 #clustering with K-means algorithm
 print("\nClustering with Kmeans ... ... ")
-centroids, C = kMeans(representation_matrix_autoencoder, K = num_clusters)
+kmeans = KMeans(n_clusters=num_clusters).fit(representation_matrix_autoencoder)
 print("\nThe indices of clusters, to which each node belongs.")
-print(C)
+labels = kmeans.labels_
 
-
+'''   '''
 #visualise the clustering result using TSNE tool
-model = TSNE(n_components=2,metric='cosine')
+model = TSNE(n_components=2, metric='cosine')
 Rep_2dim = model.fit_transform(representation_matrix_autoencoder)
-clusters = np.asarray([Rep_2dim[C == k]  for k in range(num_clusters) if np.any(Rep_2dim[C == k])])
+clusters = np.asarray([Rep_2dim[labels == k]  for k in range(num_clusters) if np.any(Rep_2dim[labels == k])])
 
-plt.scatter(clusters[0][:, 0], clusters[0][:, 1], c='red')
-plt.scatter(clusters[3][:, 0], clusters[3][:, 1], c='green')
-plt.scatter(clusters[4][:, 0], clusters[4][:, 1], c='blue')
+plt.title("The visualisation the 3 clusters chosen randomly")
+i=np.random.randint(num_clusters)
+plt.scatter(clusters[i][:, 0], clusters[i][:, 1], c='red')
+i=np.random.randint(num_clusters)
+plt.scatter(clusters[i][:, 0], clusters[i][:, 1], c='green')
+i=np.random.randint(num_clusters)
+plt.scatter(clusters[i][:, 0], clusters[i][:, 1], c='blue')
 plt.show()
 
 
